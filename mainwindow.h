@@ -1,11 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "qlistwidget.h"
+#include "qtableview.h"
 #include <QGraphicsScene>
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QStringListModel>
 #include <QGraphicsPixmapItem>
+#include <QLabel>
+#include <QGraphicsView>
+#include "customgraphicview.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -13,75 +18,37 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-/**
- * @brief Класс MainWindow представляет главное окно приложения.
- *
- * Класс MainWindow является наследником QMainWindow и содержит основную логику приложения.
- * Он управляет графической сценой, виджетами и моделями данных.
- */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Конструктор класса MainWindow.
-     *
-     * @param parent Родительский виджет.
-     */
     MainWindow(QWidget *parent = nullptr);
-
-    /**
-     * @brief Деструктор класса MainWindow.
-     */
     ~MainWindow();
 
 private slots:
-    /**
-     * @brief Слот для обработки события отпускания элемента на графической сцене.
-     *
-     * @param icon Иконка отпущенного на графической сцене элемента.
-     */
-    void onGraphicViewDrop(QIcon icon);
-
-    /**
-     * @brief Слот для обработки события клика по элементу в списке.
-     *
-     * @param index Индекс выбранного элемента в списке.
-     */
-    void onListViewClicked(const QModelIndex &index);
-
-    /**
-     * @brief Слот для обработки события изменения значения ячейки в таблице.
-     *
-     * @param topLeft Верхний левый индекс измененной ячейки.
-     * @param bottomRight Нижний правый индекс измененной ячейки.
-     */
-    void onCellChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+    void onIconDrop(QIcon icon);
+    void onIconSelected(const QModelIndex &index);
+    void onCoordinateChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 private:
     Ui::MainWindow *ui; /**< Указатель на объект пользовательского интерфейса. */
-    QGraphicsScene *scene; /**< Указатель на графическую сцену. */
-    QGraphicsView *view; /**< Указатель на виджет QGraphicsView. */
-    QList<QStandardItemModel*> tableModels; /**< Список моделей данных таблицы. */
-    QList<QGraphicsPixmapItem*> icons; /**< Список графических элементов. */
+    QGraphicsScene *iconsScene; /**< Указатель на графическую сцену, на которой
+отображаются все иконки */
+    QList<QGraphicsPixmapItem*> icons; /**< Список из объектов QGraphicsPixmapItem, необходимый
+для рисования и манипулирования с иконками на графической сцене */
+    QTableView* coordinatesTable; /**< Отображение таблицы с координатами иконок */
+    QListWidget* iconsList; /**< Список возможных видов иконок */
+    QListView* iconsOnSceneList; /**< Список отображаемых иконок, с помощью которого можно
+выбирать, координаты какой иконки отображать в таблице */
+    CustomGraphicView* iconsGraphics; /**< Указатель на пользовательский тип,который
+наследуется от QGraphicView, необходимых для отображения иконок и формирования сигнала
+отпускания иконки. */
 
-    /**
-     * @brief Отрисовка иконки на графической сцене.
-     *
-     * @param icon Иконка для отрисовки.
-     */
     void drawIcon(QIcon icon);
-
-    /**
-     * @brief Добавление модели данных таблицы.
-     */
-    void addTableModel();
-
-    /**
-     * @brief Добавление строки [icon] в таблицу QListView.
-     */
+    void initTableModel();
     void addRow();
+    void addIcon(const QString& filePath, const QSize& size, const QColor& color);
 };
 
 #endif // MAINWINDOW_H
