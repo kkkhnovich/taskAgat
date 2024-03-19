@@ -95,7 +95,11 @@ void MainWindow::onIconSelected(const QModelIndex &index)
 */
 void MainWindow::onCoordinateChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
-    //Находим индекс текущей выбранной строки в таблице listView
+    //Обработчик ситуации, когда не выбрана ни одна иконка
+    if (iconsOnSceneList->selectionModel()->selectedIndexes().empty()) {
+        return;
+    }
+    //Находим индекс текущей выбранной строки(если строка выбрана) в таблице listView
     QModelIndex selectedIndexes = iconsOnSceneList->selectionModel()->selectedIndexes()[0];
     //Находи иконку, соответствующую выбранному индексу
     QGraphicsPixmapItem* icon = icons[selectedIndexes.row()];
