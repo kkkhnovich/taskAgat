@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "qlistwidget.h"
-#include "qtableview.h"
 #include <QGraphicsScene>
 #include <QMainWindow>
 #include <QStandardItemModel>
@@ -10,21 +8,20 @@
 #include <QGraphicsPixmapItem>
 #include <QLabel>
 #include <QGraphicsView>
-#include "customgraphicview.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-class MainWindow;
+class MainForm;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class MainForm : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    MainForm(QWidget *parent = nullptr);
+    ~MainForm();
 
 private slots:
     void onIconDrop(QIcon icon);
@@ -32,18 +29,11 @@ private slots:
     void onCoordinateChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 private:
-    Ui::MainWindow *ui; /**< Указатель на объект пользовательского интерфейса. */
+    Ui::MainForm *ui; /**< Указатель на объект пользовательского интерфейса. */
     QGraphicsScene *iconsScene; /**< Указатель на графическую сцену, на которой
 отображаются все иконки */
     QList<QGraphicsPixmapItem*> icons; /**< Список из объектов QGraphicsPixmapItem, необходимый
 для рисования и манипулирования с иконками на графической сцене */
-    QTableView* coordinatesTable; /**< Отображение таблицы с координатами иконок */
-    QListWidget* iconsList; /**< Список возможных видов иконок */
-    QListView* iconsOnSceneList; /**< Список отображаемых иконок, с помощью которого можно
-выбирать, координаты какой иконки отображать в таблице */
-    CustomGraphicView* iconsGraphics; /**< Указатель на пользовательский тип,который
-наследуется от QGraphicView, необходимых для отображения иконок и формирования сигнала
-отпускания иконки. */
 
     void drawIcon(QIcon icon);
     void initTableModel();

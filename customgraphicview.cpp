@@ -1,5 +1,10 @@
 #include "customgraphicview.h"
 
+/**
+ * @brief Конструктов для класса пользовательской графики для отображения иконок
+ * @details Класс необходим для срабатывания сигнала отпускания иконки.
+ * @param родительский виджет
+ */
 CustomGraphicView::CustomGraphicView(QWidget *widget) : QGraphicsView(widget)
 {
     setAcceptDrops(true);

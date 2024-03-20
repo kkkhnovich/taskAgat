@@ -1,55 +1,48 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
+/**
+ * @brief Класс окна приложения
+ * @details Класс предназначен для обработаки всех сигналов и отрисовки всех необходимых
+ * элементов.
+ * @param родительский виджет
+ */
+MainForm::MainForm(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainForm)
 {
     ui->setupUi(this);
-    //Изменение имен графических компонентов
-    coordinatesTable = ui->tableView;
-    iconsList = ui->listWidget;
-    iconsOnSceneList = ui->listView;
-    iconsGraphics = ui->graphicsView;
-
     //Задание стилей
-    iconsGraphics->setStyleSheet("border: 1px solid black;");
-    iconsOnSceneList->setStyleSheet("border: 1px solid gray;");
-    coordinatesTable->setStyleSheet("border: 1px solid gray;");
-    iconsList->setStyleSheet("border: 1px solid gray;");
-    iconsOnSceneList->setModel(new QStringListModel());
-    iconsGraphics->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    ui->iconsGraphics->setStyleSheet("border: 1px solid black;");
+    ui->iconsOnSceneList->setStyleSheet("border: 1px solid gray;");
+    ui->coordinatesTable->setStyleSheet("border: 1px solid gray;");
+    ui->iconsList->setStyleSheet("border: 1px solid gray;");
+    ui->iconsOnSceneList->setModel(new QStringListModel());
+    ui->iconsGraphics->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     //Конфигурация graphicsView
     iconsScene = new QGraphicsScene(this);
-    iconsGraphics->setScene(iconsScene);
-    iconsScene->setSceneRect(QRectF(QPointF(0, 0), iconsGraphics->size()));
+    ui->iconsGraphics->setScene(iconsScene);
+    iconsScene->setSceneRect(QRectF(QPointF(0, 0), ui->iconsGraphics->size()));
 
     //Связь слотов и сигналов
-    connect(iconsGraphics, &CustomGraphicView::iconDrop, this, &MainWindow::onIconDrop);
-    connect(iconsOnSceneList, &QListView::clicked, this, &MainWindow::onIconSelected);
+    connect(ui->iconsGraphics, &CustomGraphicView::iconDrop, this, &MainForm::onIconDrop);
+    connect(ui->iconsOnSceneList, &QListView::clicked, this, &MainForm::onIconSelected);
 
     //Задание иконок в listWidget
     addIcon(":/images/icon.png", QSize(64, 64), QColor(255, 0, 0));
     addIcon(":/images/icon.png", QSize(32, 32), QColor(0, 0, 255));
     //Задаём максимальное значение размера иконок
-    iconsList->setIconSize(QSize(64, 64));
+    ui->iconsList->setIconSize(QSize(64, 64));
 
     //Расрешение на перетаскивание и отпускания в listWidget и graphicsView
-    iconsList->setDragEnabled(true);
-    iconsGraphics->setAcceptDrops(true);
+    ui->iconsList->setDragEnabled(true);
+    ui->iconsGraphics->setAcceptDrops(true);
 
     //Запрет на редактирование записей в таблице отображаемых иконок
-    iconsOnSceneList->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    //Настройка сеток для масштабирования
-    QGridLayout* layout = new QGridLayout(ui->centralwidget);
-    layout->addWidget(ui->gridLayoutWidget);
-    QVBoxLayout* groupBoxLayout = new QVBoxLayout(ui->groupBox);
-    groupBoxLayout->addWidget(iconsList);
-    ui->groupBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    ui->iconsOnSceneList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
-MainWindow::~MainWindow()
+MainForm::~MainForm()
 {
     delete ui;
     for (QGraphicsPixmapItem* icon : icons) {
@@ -61,9 +54,9 @@ MainWindow::~MainWindow()
  * @brief Слот для обработки события отпускания элемента на графической сцене.
  * @details Слот вызывает функции рисования иконки на сцене, а также добавление строки в
  * список отображаемых иконок
- * @param icon Иконка, которую пользователь перетянул из списка возможных иконок(iconsList).
+ * @param icon Иконка, которую пользователь перетянул из списка возможных иконок(ui->iconsList).
  */
-void MainWindow::onIconDrop(QIcon icon)
+void MainForm::onIconDrop(QIcon icon)
 {
     drawIcon(icon);
     addRow();
@@ -75,14 +68,14 @@ void MainWindow::onIconDrop(QIcon icon)
  * она отображала координаты, соответствующие выбранной иконке
  * @param index Номер выбранной иконки
  */
-void MainWindow::onIconSelected(const QModelIndex &index)
+void MainForm::onIconSelected(const QModelIndex &index)
 {
     //Инициализация таблицы, если строка выбрана в первый раз
-    if (!coordinatesTable->model()) {
+    if (!ui->coordinatesTable->model()) {
         initTableModel();
     }
     //Изменение отображения в зависимости от выбранной строки
-    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(coordinatesTable->model());
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui->coordinatesTable->model());
     model->item(0, 1)->setData(icons[index.row()]->pos().x(), Qt::EditRole);
     model->item(1, 1)->setData(icons[index.row()]->pos().y(), Qt::EditRole);
 }
@@ -93,14 +86,14 @@ void MainWindow::onIconSelected(const QModelIndex &index)
 * @param topLeft Верхний левый индекс измененной ячейки(координаты).
 * @param bottomRight Нижний правый индекс измененной ячейки(координаты).
 */
-void MainWindow::onCoordinateChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+void MainForm::onCoordinateChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
     //Обработчик ситуации, когда не выбрана ни одна иконка
-    if (iconsOnSceneList->selectionModel()->selectedIndexes().empty()) {
+    if (ui->iconsOnSceneList->selectionModel()->selectedIndexes().empty()) {
         return;
     }
     //Находим индекс текущей выбранной строки(если строка выбрана) в таблице listView
-    QModelIndex selectedIndexes = iconsOnSceneList->selectionModel()->selectedIndexes()[0];
+    QModelIndex selectedIndexes = ui->iconsOnSceneList->selectionModel()->selectedIndexes()[0];
     //Находи иконку, соответствующую выбранному индексу
     QGraphicsPixmapItem* icon = icons[selectedIndexes.row()];
     //Проверяем, можно ли преобразовать в тип double
@@ -115,7 +108,7 @@ void MainWindow::onCoordinateChanged(const QModelIndex &topLeft, const QModelInd
     }
     //Возвращаем предыдущее значение, если был введен мусор
     else {
-        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(coordinatesTable->model());
+        QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui->coordinatesTable->model());
         model->item(0, 1)->setData(icon->pos().x(), Qt::EditRole);
         model->item(1, 1)->setData(icon->pos().y(), Qt::EditRole);
     }
@@ -127,7 +120,7 @@ void MainWindow::onCoordinateChanged(const QModelIndex &topLeft, const QModelInd
 * выбранного вида рисуется в координатах 0, 0.
 * @param icon Иконка для отрисовки.
 */
-void MainWindow::drawIcon(QIcon Icon)
+void MainForm::drawIcon(QIcon Icon)
 {
     QPixmap pixmap = Icon.pixmap(Icon.actualSize(QSize(64, 64)));
     QGraphicsPixmapItem* pixmapItem = iconsScene->addPixmap(pixmap);
@@ -140,7 +133,7 @@ void MainWindow::drawIcon(QIcon Icon)
 * @details Функция необходима для инициализации модели таблицы координат, при первом
 * нажатии на икону в списке отображаемых иконок.
 */
-void MainWindow::initTableModel()
+void MainForm::initTableModel()
 {
     QStandardItemModel* model = new QStandardItemModel(2, 2, this);
 
@@ -154,10 +147,10 @@ void MainWindow::initTableModel()
     model->item(1, 0)->setEnabled(false);
     model->setItem(1, 1, new QStandardItem("0"));
 
-    coordinatesTable->setModel(model);
-    connect(model, &QAbstractItemModel::dataChanged, this, &MainWindow::onCoordinateChanged);
-    coordinatesTable->horizontalHeader()->setVisible(false);
-    coordinatesTable->verticalHeader()->setVisible(false);
+    ui->coordinatesTable->setModel(model);
+    connect(model, &QAbstractItemModel::dataChanged, this, &MainForm::onCoordinateChanged);
+    ui->coordinatesTable->horizontalHeader()->setVisible(false);
+    ui->coordinatesTable->verticalHeader()->setVisible(false);
 }
 
 /**
@@ -165,13 +158,13 @@ void MainWindow::initTableModel()
 * @details Эта функция вызывается при перетаскивании иконки из области возможных иконок.
 * Она добавляет запись, соответствующую отображаемой(т.е. нарисованной на сцене) иконки.
 */
-void MainWindow::addRow()
+void MainForm::addRow()
 {
-    QStringListModel* model = qobject_cast<QStringListModel*>(iconsOnSceneList->model());
+    QStringListModel* model = qobject_cast<QStringListModel*>(ui->iconsOnSceneList->model());
     QStringList itemList = model->stringList();
     itemList.append("[icon]");
     model->setStringList(itemList);
-    iconsOnSceneList->setModel(model);
+    ui->iconsOnSceneList->setModel(model);
 }
 
 /**
@@ -182,7 +175,7 @@ void MainWindow::addRow()
  * @param size Размер для отображения иконки
  * @param color Цвет иконки
  */
-void MainWindow::addIcon(const QString &filePath, const QSize &size, const QColor &color)
+void MainForm::addIcon(const QString &filePath, const QSize &size, const QColor &color)
 {
     QPixmap originalPixmap(filePath);
     QPixmap scaledPixmap = originalPixmap.scaled(size);
@@ -199,5 +192,5 @@ void MainWindow::addIcon(const QString &filePath, const QSize &size, const QColo
     painter.end();
 
     QIcon icon(coloredPixmap);
-    iconsList->addItem(new QListWidgetItem(icon, "Иконка"));
+    ui->iconsList->addItem(new QListWidgetItem(icon, "Иконка"));
 }
