@@ -1,17 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-class A {
-public:
-    int *a;
-    A() {
-        a = new int(5);
-    }
-    ~A() {
-        qDebug() << "Hi";
-    }
-};
-
 /**
  * @brief Конструктор класса окна приложения
  * @details Класс предназначен для обработаки всех сигналов и отрисовки всех необходимых
@@ -22,7 +11,6 @@ MainForm::MainForm(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainForm)
 {
-    A *a = new A();
     ui->setupUi(this);
     //Задание стилей
     ui->iconsGraphics->setStyleSheet("border: 1px solid black;");
