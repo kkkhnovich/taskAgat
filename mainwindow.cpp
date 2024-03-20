@@ -177,20 +177,14 @@ void MainForm::addRow()
  */
 void MainForm::addIcon(const QString &filePath, const QSize &size, const QColor &color)
 {
-    QPixmap originalPixmap(filePath);
-    QPixmap scaledPixmap = originalPixmap.scaled(size);
+    QPixmap iconPixmap = QPixmap(filePath).scaled(size);
 
-    QPixmap coloredPixmap(scaledPixmap.size());
-    coloredPixmap.fill(Qt::transparent);
-
-    QPainter painter(&coloredPixmap);
-    painter.setCompositionMode(QPainter::CompositionMode_Source);
-    painter.drawPixmap(coloredPixmap.rect(), scaledPixmap);
-
+    //Изменение цвета иконки
+    QPainter painter(&iconPixmap);
     painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    painter.fillRect(coloredPixmap.rect(), color);
+    painter.fillRect(iconPixmap.rect(), color);
     painter.end();
 
-    QIcon icon(coloredPixmap);
+    QIcon icon(iconPixmap);
     ui->iconsList->addItem(new QListWidgetItem(icon, "Иконка"));
 }
